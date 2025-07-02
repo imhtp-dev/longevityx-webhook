@@ -5,7 +5,14 @@ app = Flask(__name__)
 
 WHOOP_CLIENT_SECRET = os.environ.get("WHOOP_CLIENT_SECRET")
 if not WHOOP_CLIENT_SECRET:
-    raise RuntimeError("Set WHOOP_CLIENT_SECRET env var")
+    WHOOP_CLIENT_SECRET = "PLACEHOLDER_SECRET"
+    app.logger.warning("WHOOP_CLIENT_SECRET non impostato: uso placeholder; "
+                       "verifica firma DISABILITATA fino a quando non configuri il secret")
+
+
+'''WHOOP_CLIENT_SECRET = os.environ.get("WHOOP_CLIENT_SECRET")
+if not WHOOP_CLIENT_SECRET:
+    raise RuntimeError("Set WHOOP_CLIENT_SECRET env var")'''
 
 def verify_signature(req):
     sig = req.headers.get("X-WHOOP-Signature", "")
