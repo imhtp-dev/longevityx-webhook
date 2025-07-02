@@ -2,7 +2,9 @@ import os, hmac, base64, hashlib
 from flask import Flask, request, abort, jsonify 
 
 app = Flask(__name__)
-
+CLIENT_ID     = os.environ["CLIENT_ID"]        
+REDIRECT_URI  = "https://imhtp-dev.github.io/longevityx/redirect.html"
+TOKEN_URL     = "https://api.prod.whoop.com/oauth/oauth2/token"
 WHOOP_CLIENT_SECRET = os.environ.get("WHOOP_CLIENT_SECRET")
 if not WHOOP_CLIENT_SECRET:
     WHOOP_CLIENT_SECRET = "PLACEHOLDER_SECRET"
@@ -29,9 +31,42 @@ def whoop_webhook():
     data = request.json
     app.logger.info(f"Webhook received: {data}")
     return "", 204
-# ——— New health‐check endpoint ———
+
 @app.route("/health", methods=["GET"])
 def health_check():
     return jsonify(status="ok"), 200
+@app.post("/oauth/exchange")
+def oauth_exchange():
+    payload = request.get_json()
+    code  = payload["code"]
+    state = payload["state"]                     
+
+    data = {
+        "grant_type":    "authorization_code",
+        "code":          code,
+        "redirect_uri":  REDIRECT_URI,
+        "client_id":     CLIENT_ID,
+        "client_secret": WHOOP_CLIENT_SECRET
+    }
+
+    # Scambia code → token
+    r = requests.post(TOKEN_URL, data=data, timeout=10)
+    r.raise_for_status()
+    tokens = r.json()    
+
+    
+    app.logger.warning(
+        "WHOOP tokens received:\n"
+        "  access_token = %s\n"
+        "  refresh_token = %s\n"
+        "  expires_in = %s",
+        tokens["access_token"],
+        tokens["refresh_token"],
+        tokens["expires_in"]
+    )
+
+    # TODO: salva tokens in DB (user_id ➜ access_token, refresh_token, expires_at)
+
+    return jsonify(ok=True), 200
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
