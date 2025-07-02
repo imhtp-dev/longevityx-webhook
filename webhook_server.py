@@ -1,5 +1,5 @@
 import os, hmac, base64, hashlib
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify 
 
 app = Flask(__name__)
 
