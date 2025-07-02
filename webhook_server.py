@@ -39,7 +39,7 @@ def health_check():
 def oauth_exchange():
     payload = request.get_json()
     code  = payload["code"]
-    state = payload["state"]                     
+    state = payload["state"]          # (facoltativo) convalida se necessario
 
     data = {
         "grant_type":    "authorization_code",
@@ -52,21 +52,14 @@ def oauth_exchange():
     # Scambia code → token
     r = requests.post(TOKEN_URL, data=data, timeout=10)
     r.raise_for_status()
-    tokens = r.json()    
+    tokens = r.json()   # access_token, refresh_token, expires_in
 
-    
-    app.logger.warning(
-        "WHOOP tokens received:\n"
-        "  access_token = %s\n"
-        "  refresh_token = %s\n"
-        "  expires_in = %s",
-        tokens["access_token"],
-        tokens["refresh_token"],
-        tokens["expires_in"]
-    )
+    # 🔵 PRINT su stdout così compare nei Log Stream di Azure
+    print("==== WHOOP TOKENS @", time.strftime("%Y-%m-%d %H:%M:%S"), "====")
+    print(json.dumps(tokens, indent=2))
+    sys.stdout.flush()          # forza lo flush immediato nello stream log
 
-    # TODO: salva tokens in DB (user_id ➜ access_token, refresh_token, expires_at)
-
+    # TIP: qui salva tokens in DB, poi restituisci OK
     return jsonify(ok=True), 200
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
