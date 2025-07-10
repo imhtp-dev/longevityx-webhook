@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Workout History</title>
+  <style>
+    table {
+      width: 80%;
+      margin: auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    h2 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Workout History</h2>
+  <table>
+    <tr>
+      <th>Date</th>
+      <th>Activity</th>
+      <th>Strain</th>
+      <th>Avg HR</th>
+      <th>Calories</th>
+      <th>Duration</th>
+    </tr>
+
+{% set total_strain = 0 %}
+{% set total_hr = 0 %}
+{% set total_kcal = 0 %}
+{% set total_duration = 0 %}
+{% set count = 0 %}
+
+{% for w in workouts %}
+  {% set valid = w.get('strain') is not none and w.get('average_heart_rate') is not none and w.get('kilojoule') is not none and w.get('duration') is not none %}
+  <tr>
+    <td>{{ w['start'].split("T")[0] }}</td>
+    <td>{{ w.get('sport_id', 'N/A') }}</td>
+    <td>{{ w['strain'] if w['strain'] is not none else 'N/A' }}</td>
+    <td>{{ (w['average_heart_rate'] ~ ' bpm') if w['average_heart_rate'] is not none else 'N/A' }}</td>
+    <td>{{ (w['kilojoule'] / 4.184) | round(1) if w['kilojoule'] is not none else 'N/A' }} kcal</td>
+    <td>{{ (w['duration'] | float / 1000) | round(1) if w['duration'] is not none else 'N/A' }} min</td>
+  </tr>
+  {% if valid %}
+    {% set total_strain = total_strain + w['strain'] %}
+    {% set total_hr = total_hr + w['average_heart_rate'] %}
+    {% set total_kcal = total_kcal + (w['kilojoule'] / 4.184) %}
+    {% set total_duration = total_duration + (w['duration'] | float / 1000) %}
+    {% set count = count + 1 %}
+  {% endif %}
+{% endfor %}
+
+{% if count > 0 %}
+<tr style="font-weight: bold;">
+  <td colspan="2">Averages</td>
+  <td>{{ (total_strain / count) | round(1) }}</td>
+  <td>{{ (total_hr / count) | round(1) }} bpm</td>
+  <td>{{ (total_kcal / count) | round(1) }} kcal</td>
+  <td>{{ (total_duration / count) | round(1) }} min</td>
+</tr>
+{% endif %}
+  </table>
+</body>
+</html>
+

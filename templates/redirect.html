@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LongevityX Redirect</title>
+</head>
+<body style="font-family: Arial, sans-serif; text-align: center; padding: 2em;">
+  <h1>Login Successful</h1>
+  <p>You can now close this page and return to LongevityX.</p>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const code   = params.get('code');
+      const state  = params.get('state');
+      if (code) {
+        fetch('https://longevitydev-bbffeufsfpaegab8.francecentral-01.azurewebsites.net/oauth/exchange', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, state })
+        }).catch(console.error);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sleep History</title>
+  <style>
+    table {
+      width: 80%;
+      margin: auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    h2 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Sleep History</h2>
+  <table>
+    <tr>
+      <th>Date</th>
+      <th>Score</th>
+      <th>Time in Bed</th>
+      <th>Efficiency</th>
+    </tr>
+   {% for s in sleeps %}
+    <tr>
+      <td>{{ s['start'].split("T")[0] }}</td>
+      <td>{{ s['sleep_performance_percentage'] if s['sleep_performance_percentage'] is not none else 'N/A' }}%</td>
+      <td>{{ (s['total_in_bed_time_milli'] // 60000) if s['total_in_bed_time_milli'] else 'N/A' }} min</td>
+      <td>{{ s['sleep_efficiency_percentage'] if s['sleep_efficiency_percentage'] is not none else 'N/A' }}%</td>
+    </tr>
+  {% endfor %}
+  </table>
+</body>
+</html>
